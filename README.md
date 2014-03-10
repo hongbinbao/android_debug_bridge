@@ -19,6 +19,7 @@ adb related
         sdk/platform-tools/adb
     2: adb server: 
         running on HOST
+        connect with adbd
         detect device connect/remove
         transfer data between adb/adb.exe and host service and android service.
     3: adbd:
