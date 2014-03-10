@@ -27,6 +27,6 @@ adb related
         provide android device service from adb/adb.exe
         /sbin/adbd
     4: service
-       local service: adbd
-       host service:  adb server
+        local service: adbd
+        host service:  adb server
     
