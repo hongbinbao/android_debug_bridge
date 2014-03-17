@@ -26,7 +26,8 @@ adb related
         daemon running on android device/emulator
         connect with adb server
         provide android device service from adb/adb.exe
-        /sbin/adbd
+        /sbin/adbd 
+        init.rc: service adbd /sbin/adbd
     4: service
         local service: adbd
         host service:  adb server
