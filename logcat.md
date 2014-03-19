@@ -3,8 +3,8 @@ logcat
 
 ### overriew
 
-    doc: system/core/adb/transports.txt; system/core/adb/OVERVIEW.txt
-![github](https://github.com/hongbinbao/android_debug_bridge/blob/master/adb.png?raw=true "github")
+    doc: 
+![github](https://github.com/hongbinbao/android_debug_bridge/blob/master/log.png?raw=true "github")
 
 ### android log
 
