@@ -6,17 +6,18 @@ note for logcat
 ![github](https://github.com/hongbinbao/android_debug_bridge/blob/master/log.png?raw=true "github")
 
 ### android system and application log
-    /dev/log/main:
-      An Android application includes the android.util.Log class, and uses methods of this class to write messages of different priority into the log.
+    access node on device file system:
+    /dev/log/main
+        An Android application includes the android.util.Log class, and uses methods of this class to write messages of different priority into the log.
     
-    /dev/log/events:
-      Event logs messages are created using android.util.EventLog class, which create binary-formatted log messages.
+    /dev/log/events
+        Event logs messages are created using android.util.EventLog class, which create binary-formatted log messages.
     
-    /dev/log/radio:
-      radio and phone-related information
+    /dev/log/radio
+        radio and phone-related information
     
-    /dev/log/system:
-      Many classes in the Android framework utilize the system log to keep their messages separate from (possibly noisy) application log messages. These programs use the android.util.Slog class, with its associated messages.
+    /dev/log/system
+        Many classes in the Android framework utilize the system log to keep their messages separate from (possibly noisy) application log messages. These programs use the android.util.Slog class, with its associated messages.
     
 ### kernel log
     /proc/kmsg
