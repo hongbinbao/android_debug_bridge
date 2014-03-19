@@ -1,0 +1,15 @@
+==================
+logcat
+
+==================
+
+#### ring buffer
+
+    test@test-OptiPlex-740-Enhanced:~$ adb logcat -g
+    /dev/log/main: ring buffer is 256Kb (255Kb consumed), max entry is 5120b, max payload is 4076b
+    /dev/log/system: ring buffer is 256Kb (154Kb consumed), max entry is 5120b, max payload is 4076b
+    
+    Buffer size is determined by the kernel, found in */drivers/staging/android/logger.c
+    Which buffers are used and the size has changed with Android Versions. 
+    Android 3.0 and newer also have a system buffer, and all four are 256kb.
+    You have to recompile the kernel to change it.
