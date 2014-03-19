@@ -1,7 +1,18 @@
 logcat
 ==================
 
-###
+### overriew
+
+    doc: system/core/adb/transports.txt; system/core/adb/OVERVIEW.txt
+![github](https://github.com/hongbinbao/android_debug_bridge/blob/master/adb.png?raw=true "github")
+
+### android log
+
+    The logging system consists of:
+    a kernel driver and kernel buffers for storing log messages
+    C, C++ and Java classes for making log entries and for accessing the log messages
+    a standalone program for viewing log messages (logcat)
+    ability to view and filter the log messages from the host machine (via eclipse or ddms)
 
 ### ring buffer
 
