@@ -16,3 +16,11 @@ logcat
     
 ### catch /dev/log/system, /dev/log/main
     adb logcat -v time -f /sdcard/dev.log -r 1024  -n 0 -d
+
+### /dev/log
+    root@android:/dev/log # ls
+    events
+    ksystem
+    main
+    radio
+    system
