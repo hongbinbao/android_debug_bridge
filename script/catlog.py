@@ -5,12 +5,14 @@ import subprocess
 import threading
 import time
 import os
+import sys
 import Queue
 import shlex
 from os.path import exists
 from os.path import join
 from os.path import splitext
 from os.path import dirname
+from signal import signal, SIGINT,SIGTSTP
 
 ANDROID_LOG_SHELL = 'adb logcat -v time'
 REPORT_TIME_STAMP_FORMAT = '%Y-%m-%d_%H:%M:%S'
@@ -46,6 +48,9 @@ class OutputFile(file):
             file.__init__(self, self._getfilename(), self.mode)
             file.write(self, text)
             self.size += lentext
+
+    def __exit__(self, type, value, trace):
+        self.close()
 
     def writelines(self, lines):
         for line in lines:
@@ -119,10 +124,13 @@ class LogCacheWrapper(threading.Thread):
 class LogWriter(threading.Thread):
     def __init__(self, queue, output):
         threading.Thread.__init__(self)
-        #self.daemon = True
+        self.daemon = True
         self.__stop = False
         self.__queue = queue
         self.__output = output
+
+    def stop(self):
+        self.__stop = True
 
     def run1(self):
         dirs = _mkdir('catlogs')
@@ -141,13 +149,27 @@ class LogWriter(threading.Thread):
 
     def run(self):
         line = None
-        while True:
-            line = self.__queue.get(block=True)
-            self.__output.write(line) 
+        with self.__output:
+            while not self.__stop:
+                line = self.__queue.get(block=True)
+                self.__output.write(line)
 
-cache_q = Queue.Queue()
-outputfile = OutputFile('catlogs/log.txt', 'w+', 1024*1024)
+def listen(signum, frame):
+    '''
+    catch CTRL+Z event and ignore.
+    '''
+    print 'press CTRL+C to exit!'
 
-handler = LogHandler(cache_q)
-handler.start()
-LogWriter(cache_q, outputfile).start()
+if __name__ == '__main__':
+    signal(SIGTSTP, listen)
+    cache_q = Queue.Queue()
+    outputfile = OutputFile('catlogs/log.txt', 'w+', 1024*1024)
+    handler = LogHandler(cache_q)
+    handler.start()
+    writer = LogWriter(cache_q, outputfile)
+    writer.start()
+    while writer.isAlive():
+        try: pass
+        except KeyboardInterrupt:
+            writer.stop()
+
