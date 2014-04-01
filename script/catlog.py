@@ -8,6 +8,7 @@ import os
 import sys
 import Queue
 import shlex
+import atexit
 from os.path import exists
 from os.path import join
 from os.path import splitext
@@ -71,11 +72,14 @@ class OutputFile(file):
         self.size = 0
 
 
+
 class LogHandler(object):
     def __init__(self, queue=None):
         self.__cache_queue = queue if queue else Queue.Queue()
         self.__logger_proc = None
         self.__cache_thread = None
+        self.__procs = []
+        atexit.register(self.exit_subprocess)
     
     @property 
     def queue(self):
@@ -83,11 +87,19 @@ class LogHandler(object):
 
     def start(self):
         self.__logger_proc = subprocess.Popen(shlex.split(ANDROID_LOG_SHELL),\
+                                              env=dict(os.environ, ANDROID_SERIAL='serial'),\
                                               stdout=subprocess.PIPE,\
+                                              stderr=subprocess.STDOUT,\
                                               close_fds=True,\
                                               preexec_fn=self.check)
+        self.__procs.append(self.__logger_proc)
         self.__cache_thread = LogCacheWrapper(self.__logger_proc.stdout, self.__cache_queue)
         self.__cache_thread.start()
+
+    def exit_subprocess(self):
+        for p in self.__procs:
+            if p.poll() == None:
+                p.kill()
 
     def check(self):
         pass
