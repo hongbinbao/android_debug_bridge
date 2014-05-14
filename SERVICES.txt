@@ -2,6 +2,32 @@ This file tries to document all requests a client can make
 to the ADB server of an adbd daemon. See the OVERVIEW.TXT document
 to understand what's going on here.
 
+
+
+```
+framebuffer:
+    This service is used to send snapshots of the framebuffer to a client.
+    It requires sufficient privileges but works as follow:
+
+      After the OKAY, the service sends 16-byte binary structure
+      containing the following fields (little-endian format):
+
+            depth:   uint32_t:    framebuffer depth
+            size:    uint32_t:    framebuffer size in bytes
+            width:   uint32_t:    framebuffer width in pixels
+            height:  uint32_t:    framebuffer height in pixels
+
+      With the current implementation, depth is always 16, and
+      size is always width*height*2
+
+      Then, each time the client wants a snapshot, it should send
+      one byte through the channel, which will trigger the service
+      to send it 'size' bytes of framebuffer data.
+
+      If the adbd daemon doesn't have sufficient privileges to open
+      the framebuffer device, the connection is simply closed immediately.
+
+```
 HOST SERVICES:
 
 
@@ -152,6 +178,28 @@ LOCAL SERVICES:
 All the queries below assumed that you already switched the transport
 to a real device, or that you have used a query prefix as described
 above.
+
+framebuffer:
+    This service is used to send snapshots of the framebuffer to a client.
+    It requires sufficient privileges but works as follow:
+
+      After the OKAY, the service sends 16-byte binary structure
+      containing the following fields (little-endian format):
+
+            depth:   uint32_t:    framebuffer depth
+            size:    uint32_t:    framebuffer size in bytes
+            width:   uint32_t:    framebuffer width in pixels
+            height:  uint32_t:    framebuffer height in pixels
+
+      With the current implementation, depth is always 16, and
+      size is always width*height*2
+
+      Then, each time the client wants a snapshot, it should send
+      one byte through the channel, which will trigger the service
+      to send it 'size' bytes of framebuffer data.
+
+      If the adbd daemon doesn't have sufficient privileges to open
+      the framebuffer device, the connection is simply closed immediately.
 
 shell:command arg1 arg2 ...
     Run 'command arg1 arg2 ...' in a shell on the device, and return
