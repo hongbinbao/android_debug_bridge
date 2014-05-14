@@ -7,7 +7,7 @@ adb related
 
 ### model
 
-    doc: system/core/adb/transports.txt; system/core/adb/OVERVIEW.txt
+    doc: system/core/adb/SERVICES.txt; system/core/adb/OVERVIEW.txt
 ![github](https://github.com/hongbinbao/android_debug_bridge/blob/master/adb.png?raw=true "github")
 
 ### componment
