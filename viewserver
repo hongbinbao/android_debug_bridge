@@ -1,0 +1,80 @@
+
+
+To preserve security, Hierarchy Viewer can only connect to devices running a developer version of the Android system.
+
+adb shell getprop
+ro.secure = 0|1
+ro.debuggable =0 | 1
+
+platform_frameworks_base\services\java\com\android\server\wm\WindowManageService.java
+
+=====================================================================================
+/** {@hide} */
+public class WindowManagerService extends IWindowManager.Stub
+        implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs,
+                DisplayManagerService.WindowManagerFuncs, DisplayManager.DisplayListener {
+.
+.
+.
+    /**
+     * Starts the view server on the specified port.
+     *
+     * @param port The port to listener to.
+     *
+     * @return True if the server was successfully started, false otherwise.
+     *
+     * @see com.android.server.wm.ViewServer
+     * @see com.android.server.wm.ViewServer#VIEW_SERVER_DEFAULT_PORT
+     */
+    @Override
+    public boolean startViewServer(int port) {
+        if (isSystemSecure()) {
+            return false;
+        }
+
+        if (!checkCallingPermission(Manifest.permission.DUMP, "startViewServer")) {
+            return false;
+        }
+
+        if (port < 1024) {
+            return false;
+        }
+
+        if (mViewServer != null) {
+            if (!mViewServer.isRunning()) {
+                try {
+                    return mViewServer.start();
+                } catch (IOException e) {
+                    Slog.w(TAG, "View server did not start");
+                }
+            }
+            return false;
+        }
+
+        try {
+            mViewServer = new ViewServer(this, port);
+            return mViewServer.start();
+        } catch (IOException e) {
+            Slog.w(TAG, "View server did not start");
+        }
+        return false;
+    }
+
+    private boolean isSystemSecure() {
+        return "1".equals(SystemProperties.get(SYSTEM_SECURE, "1")) &&
+                "0".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+    }
+.
+.
+=====================================================================================
+
+start view server:
+adb shell service call window 1 i32 4939
+
+stop view server
+adb shell service call window 2 i32 4939
+
+check view server:
+adb shell service call window 3
+fail：Result: Parcel(00000000 00000000 '........')"
+ok：Result: Parcel(00000000 00000001 '........')"
