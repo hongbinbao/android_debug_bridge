@@ -59,11 +59,87 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         return false;
     }
-
+    #no root mode: ro.secure=1 ro.debuggable = 0
     private boolean isSystemSecure() {
         return "1".equals(SystemProperties.get(SYSTEM_SECURE, "1")) &&
                 "0".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
     }
+    
+    /**
+     * Indicates whether the view server is running.
+     *
+     * @return True if the server is running, false otherwise.
+     *
+     * @see com.android.server.wm.ViewServer
+     */
+    @Override
+    public boolean isViewServerRunning() {
+        if (isSystemSecure()) {
+            return false;
+        }
+
+        if (!checkCallingPermission(Manifest.permission.DUMP, "isViewServerRunning")) {
+            return false;
+        }
+
+        return mViewServer != null && mViewServer.isRunning();
+    }
+    
+######response to view server connection:
+    /**
+     * Lists all availble windows in the system. The listing is written in the
+     * specified Socket's output stream with the following syntax:
+     * windowHashCodeInHexadecimal windowName
+     * Each line of the ouput represents a different window.
+     *
+     * @param client The remote client to send the listing to.
+     * @return False if an error occured, true otherwise.
+     */
+    boolean viewServerListWindows(Socket client) {
+       ...
+    }
+
+    // TODO(multidisplay): Extend to multiple displays.
+    /**
+     * Returns the focused window in the following format:
+     * windowHashCodeInHexadecimal windowName
+     *
+     * @param client The remote client to send the listing to.
+     * @return False if an error occurred, true otherwise.
+     */
+    boolean viewServerGetFocusedWindow(Socket client) {
+        ...
+    }
+
+    /**
+     * Sends a command to a target window. The result of the command, if any, will be
+     * written in the output stream of the specified socket.
+     *
+     * The parameters must follow this syntax:
+     * windowHashcode extra
+     *
+     * Where XX is the length in characeters of the windowTitle.
+     *
+     * The first parameter is the target window. The window with the specified hashcode
+     * will be the target. If no target can be found, nothing happens. The extra parameters
+     * will be delivered to the target window and as parameters to the command itself.
+     *
+     * @param client The remote client to sent the result, if any, to.
+     * @param command The command to execute.
+     * @param parameters The command parameters.
+     *
+     * @return True if the command was successfully delivered, false otherwise. This does
+     *         not indicate whether the command itself was successful.
+     */
+    boolean viewServerWindowCommand(Socket client, String command, String parameters) {
+        ...
+    }
+
+   
+    
+    
+    
+    
 .
 .
 =====================================================================================
@@ -78,3 +154,53 @@ check view server:
 adb shell service call window 3
 fail：Result: Parcel(00000000 00000000 '........')"
 ok：Result: Parcel(00000000 00000001 '........')"
+
+===================================view server===========================
+platform_frameworks_base\services\java\com\android\server\wm\ViewServer.java
+    /**
+     * Creates a new ViewServer associated with the specified window manager on the
+     * specified local port. The server is not started by default.
+     *
+     * @param windowManager The window manager used to communicate with the views.
+     * @param port The port for the server to listen to.
+     *
+     * @see #start()
+     */
+    ViewServer(WindowManagerService windowManager, int port) {
+        mWindowManager = windowManager;
+        mPort = port;
+    }
+    
+accept command via socket connection:
+
+    private static final String VALUE_PROTOCOL_VERSION = "4";
+    private static final String VALUE_SERVER_VERSION = "4";
+
+    // Protocol commands
+    // Returns the protocol version
+    private static final String COMMAND_PROTOCOL_VERSION = "PROTOCOL";
+    // Returns the server version
+    private static final String COMMAND_SERVER_VERSION = "SERVER";
+    // Lists all of the available windows in the system
+    private static final String COMMAND_WINDOW_MANAGER_LIST = "LIST";
+    // Keeps a connection open and notifies when the list of windows changes
+    private static final String COMMAND_WINDOW_MANAGER_AUTOLIST = "AUTOLIST";
+    // Returns the focused window
+    private static final String COMMAND_WINDOW_MANAGER_GET_FOCUS = "GET_FOCUS";
+
+'''
+                if (COMMAND_PROTOCOL_VERSION.equalsIgnoreCase(command)) {
+                    result = writeValue(mClient, VALUE_PROTOCOL_VERSION);
+                } else if (COMMAND_SERVER_VERSION.equalsIgnoreCase(command)) {
+                    result = writeValue(mClient, VALUE_SERVER_VERSION);
+                } else if (COMMAND_WINDOW_MANAGER_LIST.equalsIgnoreCase(command)) {
+                    result = mWindowManager.viewServerListWindows(mClient);
+                } else if (COMMAND_WINDOW_MANAGER_GET_FOCUS.equalsIgnoreCase(command)) {
+                    result = mWindowManager.viewServerGetFocusedWindow(mClient);
+                } else if (COMMAND_WINDOW_MANAGER_AUTOLIST.equalsIgnoreCase(command)) {
+                    result = windowManagerAutolistLoop();
+                } else {
+                    result = mWindowManager.viewServerWindowCommand(mClient,
+                            command, parameters);
+                }
+'''
