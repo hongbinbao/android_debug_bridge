@@ -136,12 +136,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
    
-    
-    
-    
-    
-.
-.
 =====================================================================================
 
 start view server:
