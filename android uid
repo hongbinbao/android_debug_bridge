@@ -1,0 +1,99 @@
+UID: User Identifier. each process of andorid has a user id which specify who owns the process.
+
+1: user process
+
+$ adb pull /data/system/packages.list ./
+$ cat packages.list | grep com.android.deskclock
+ com.android.deskclock 10016 0 /data/data/com.android.deskclock
+
+u0_a16 = u0_a(1000016-10000)
+
+USER      PID   PPID  VSIZE  RSS     WCHAN    PC         NAME
+system    509   136   590868 57812 ffffffff 40126318 S system_server
+u0_a16    3069  136   487424 32256 ffffffff 4012724c S com.android.deskclock
+u0_a46    13758 136   476384 23808 ffffffff 4012724c S com.mediatek.weather
+root      13980 165   1360   508   00000000 4011d0a8 R ps
+
+```
+
+2: system process
+defined in : https://github.com/hongbinbao/platform_system_core/blob/master/include/private/android_filesystem_config.h
+/* This is the master Users and Groups config for the platform.
+ * DO NOT EVER RENUMBER
+ */
+
+#define AID_ROOT             0  /* traditional unix root user */
+
+#define AID_SYSTEM        1000  /* system server */
+
+#define AID_RADIO         1001  /* telephony subsystem, RIL */
+#define AID_BLUETOOTH     1002  /* bluetooth subsystem */
+#define AID_GRAPHICS      1003  /* graphics devices */
+#define AID_INPUT         1004  /* input devices */
+#define AID_AUDIO         1005  /* audio devices */
+#define AID_CAMERA        1006  /* camera devices */
+#define AID_LOG           1007  /* log devices */
+#define AID_COMPASS       1008  /* compass device */
+#define AID_MOUNT         1009  /* mountd socket */
+#define AID_WIFI          1010  /* wifi subsystem */
+#define AID_ADB           1011  /* android debug bridge (adbd) */
+#define AID_INSTALL       1012  /* group for installing packages */
+#define AID_MEDIA         1013  /* mediaserver process */
+#define AID_DHCP          1014  /* dhcp client */
+#define AID_SDCARD_RW     1015  /* external storage write access */
+#define AID_VPN           1016  /* vpn system */
+#define AID_KEYSTORE      1017  /* keystore subsystem */
+#define AID_USB           1018  /* USB devices */
+#define AID_DRM           1019  /* DRM server */
+#define AID_MDNSR         1020  /* MulticastDNSResponder (service discovery) */
+#define AID_GPS           1021  /* GPS daemon */
+#define AID_UNUSED1       1022  /* deprecated, DO NOT USE */
+#define AID_MEDIA_RW      1023  /* internal media storage write access */
+#define AID_MTP           1024  /* MTP USB driver access */
+#define AID_UNUSED2       1025  /* deprecated, DO NOT USE */
+#define AID_DRMRPC        1026  /* group for drm rpc */
+#define AID_NFC           1027  /* nfc subsystem */
+#define AID_SDCARD_R      1028  /* external storage read access */
+#define AID_CLAT          1029  /* clat part of nat464 */
+#define AID_LOOP_RADIO    1030  /* loop radio devices */
+#define AID_MEDIA_DRM     1031  /* MediaDrm plugins */
+#define AID_PACKAGE_INFO  1032  /* access to installed package details */
+#define AID_SDCARD_PICS   1033  /* external storage photos access */
+#define AID_SDCARD_AV     1034  /* external storage audio/video access */
+#define AID_SDCARD_ALL    1035  /* access all users external storage */
+#define AID_LOGD          1036  /* log daemon */
+
+#define AID_SHELL         2000  /* adb and debug shell user */
+#define AID_CACHE         2001  /* cache access */
+#define AID_DIAG          2002  /* access to diagnostic resources */
+
+
+
+func to print UID:
+
+private RunningAppProcessInfo getForegroundApp()  
+    {  
+        RunningAppProcessInfo result = null, info = null;  
+  
+        if (mActivityManager == null)  
+            mActivityManager = (ActivityManager) mContext  
+                    .getSystemService(Context.ACTIVITY_SERVICE);  
+        List<RunningAppProcessInfo> l = mActivityManager  
+                .getRunningAppProcesses();  
+        Iterator<RunningAppProcessInfo> i = l.iterator();  
+        while (i.hasNext())  
+        {  
+            info = i.next();  
+            Log.v(TAG,"running app process:"+String.valueOf(info.uid)+" "+info.processName);  
+            if (info.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND  
+                    && !isRunningService(info.processName))  
+            {  
+                result = info;  
+                //Log.v(TAG,"running app:"+info.processName);  
+                break;  
+            }  
+        }  
+        return result;  
+    }  
+    
+```
