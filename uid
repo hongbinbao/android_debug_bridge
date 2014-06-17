@@ -1,0 +1,44 @@
+UID: User Identifier. each process of andorid has a user id which specify who owns the process.
+
+
+$ adb pull /data/system/packages.list ./
+$ cat packages.list | grep com.android.deskclock
+ com.android.deskclock 10016 0 /data/data/com.android.deskclock
+
+u0_a16 = u0_a(1000016-10000)
+
+USER      PID   PPID  VSIZE  RSS     WCHAN    PC         NAME
+system    509   136   590868 57812 ffffffff 40126318 S system_server
+u0_a16    3069  136   487424 32256 ffffffff 4012724c S com.android.deskclock
+u0_a46    13758 136   476384 23808 ffffffff 4012724c S com.mediatek.weather
+root      13980 165   1360   508   00000000 4011d0a8 R ps
+
+```
+print UID func:
+
+private RunningAppProcessInfo getForegroundApp()  
+    {  
+        RunningAppProcessInfo result = null, info = null;  
+  
+        if (mActivityManager == null)  
+            mActivityManager = (ActivityManager) mContext  
+                    .getSystemService(Context.ACTIVITY_SERVICE);  
+        List<RunningAppProcessInfo> l = mActivityManager  
+                .getRunningAppProcesses();  
+        Iterator<RunningAppProcessInfo> i = l.iterator();  
+        while (i.hasNext())  
+        {  
+            info = i.next();  
+            Log.v(TAG,"running app process:"+String.valueOf(info.uid)+" "+info.processName);  
+            if (info.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND  
+                    && !isRunningService(info.processName))  
+            {  
+                result = info;  
+                //Log.v(TAG,"running app:"+info.processName);  
+                break;  
+            }  
+        }  
+        return result;  
+    }  
+    
+```
